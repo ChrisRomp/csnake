@@ -7,6 +7,7 @@ A classic Snake game implementation in C++ for the console/terminal with smooth 
 ## Features
 
 - **Console Graphics**: Uses ANSI escape codes for colors and box-drawing characters
+- **Adaptive Display**: Automatically detects terminal size and scales arena to fit
 - **Smooth Gameplay**: Frame-rate controlled animation with increasing difficulty
 - **Cross-Platform**: (Hopefully) Works on Windows, macOS, and Linux
   - I've only tested on MacOS with iterm2
@@ -16,6 +17,7 @@ A classic Snake game implementation in C++ for the console/terminal with smooth 
 - **Pause Functionality**: Pause and resume gameplay anytime
 - **Collision Detection**: Proper wall and self-collision detection
 - **Welcome & Game Over Screens**: Polished UI with ASCII art
+- **Alternate Screen Buffer**: Clean game display without scrollback contamination
 
 ## Screenshots
 
@@ -42,8 +44,9 @@ A classic Snake game implementation in C++ for the console/terminal with smooth 
 
 ### Prerequisites
 
-- C++11 compatible compiler (g++, clang, MSVC)
+- C++11 compatible compiler (g++, clang++, MSVC)
 - CMake 3.10 or higher (optional, but recommended)
+- Terminal with ANSI escape code support
 
 ### Option 1: Using CMake (Recommended)
 
@@ -61,9 +64,15 @@ cmake --build .
 snake.exe      # On Windows
 ```
 
-### Option 2: Direct Compilation
+### Option 2: Direct Compilation with clang++/g++
 
-#### macOS/Linux:
+#### macOS:
+```bash
+clang++ -std=c++11 -O3 -o snake snake.cpp
+./snake
+```
+
+#### Linux:
 ```bash
 g++ -std=c++11 -O3 -o snake snake.cpp
 ./snake
@@ -80,6 +89,14 @@ snake.exe
 g++ -std=c++11 -O3 -o snake.exe snake.cpp
 snake.exe
 ```
+
+### VS Code Users
+
+A build task is included for clang++. Simply:
+1. Open the project in VS Code
+2. Press `Cmd+Shift+B` (macOS) or `Ctrl+Shift+B` (Windows/Linux)
+3. Select "C/C++: clang++ build active file"
+4. Run `./snake` from the terminal
 
 ## How to Play
 
@@ -122,9 +139,18 @@ The game is built with clean object-oriented design:
 - **Windows**: Uses `_kbhit()` and `_getch()` from `<conio.h>`
 - **Unix/Linux/macOS**: Uses `termios` for non-canonical input and `fcntl` for non-blocking reads
 
+### Terminal Size Detection
+
+- **macOS/Linux**: Uses `ioctl(TIOCGWINSZ)` to detect terminal dimensions
+- **Windows**: Uses `GetConsoleScreenBufferInfo()` for window size
+- Arena automatically scales to fit available space (default 40×20, adjusts as needed)
+- Displays warning when terminal is smaller than ideal size
+
 ### Rendering
 
-- Uses ANSI escape codes for:
+- Uses alternate screen buffer (`\033[?1049h/l`) to avoid scrollback contamination
+- Consistent `printf`-based rendering to prevent buffer mixing issues
+- ANSI escape codes for:
   - Terminal clearing and cursor positioning
   - Text colors (red, green, yellow, cyan, etc.)
   - Bold text
@@ -150,18 +176,26 @@ The game recognizes different skill levels:
 ### Colors not showing correctly
 - Ensure your terminal supports ANSI escape codes
 - On Windows, use Windows Terminal or enable ANSI support in Command Prompt
+- macOS: Both iTerm2 and Terminal.app are supported
+
+### Arena not rendering completely or scrolling
+- Increase your terminal window size (game needs minimum ~40 columns × 30 rows)
+- The game will auto-scale to fit, but very small terminals may have issues
+- Check that alternate screen buffer is supported by your terminal
 
 ### Input lag or unresponsive controls
 - Close other applications that might be using stdin
 - Ensure your terminal window has focus
+- On macOS, if using tmux/screen, ensure proper terminal emulation is set
 
 ### Compilation errors
 - Verify you have a C++11 compatible compiler
 - Check that all required headers are available on your system
+- On macOS, Xcode Command Line Tools may be required: `xcode-select --install`
 
 ## Credits
 
-Created as a demonstration of C++ console game programming using AI coding assistants. Thanks, robot friends! 🤖
+Created as a demonstration of C++ console game programming with GitHub Copilot assistance. Special thanks to the AI pair programming tools that helped debug terminal rendering issues and cross-platform compatibility! 🤖🐍
 
 ## License
 
