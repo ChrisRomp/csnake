@@ -34,7 +34,6 @@ Makefile
 !CMakeLists.txt
 
 # IDE specific files
-.vscode/
 .idea/
 *.swp
 *.swo
