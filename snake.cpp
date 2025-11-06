@@ -9,6 +9,8 @@
 #include <cstdio>
 #include <sstream>
 #include <string>
+#include <limits>
+#include <random>
 
 #ifndef _WIN32
     #include <sys/ioctl.h>
@@ -134,6 +136,7 @@ private:
     int terminalHeight;
     bool sizeWarning;
     std::string sizeWarningMessage;
+    std::mt19937 rng{std::random_device{}()};
 
     void spawnFood() {
         bool validPosition;
@@ -143,8 +146,10 @@ private:
         }
         do {
             validPosition = true;
-            food.x = rand() % boardWidth;
-            food.y = rand() % boardHeight;
+            std::uniform_int_distribution<int> distX(0, boardWidth - 1);
+            std::uniform_int_distribution<int> distY(0, boardHeight - 1);
+            food.x = distX(rng);
+            food.y = distY(rng);
 
             // Make sure food doesn't spawn on snake
             for (const auto& segment : snake) {
@@ -469,7 +474,6 @@ public:
           terminalWidth(0),
           terminalHeight(0),
           sizeWarning(false) {
-        srand(static_cast<unsigned>(time(nullptr)));
     }
 
     void reset() {
@@ -534,7 +538,7 @@ public:
 
         // Clear cin state and flush any remaining input
         std::cin.clear();
-        std::cin.sync();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         // Now initialize keyboard input (switches to non-blocking mode)
         keyboard.reset(new KeyboardInput());
@@ -576,6 +580,9 @@ public:
         }
 
         std::cout << "\n    " << WHITE << "Press " << GREEN << "R" << WHITE << " to play again or " << RED << "Q" << WHITE << " to quit..." << RESET << std::flush;
+
+        // Check for null keyboard pointer
+        if (!keyboard) return false;
 
         // Clear any buffered input first
         while (keyboard->kbhit()) {
