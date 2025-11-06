@@ -1,5 +1,7 @@
 ---
 applyTo: "docs/**/*.md"
+name: "Documentation"
+description: "Guidelines for writing project documentation"
 ---
 # Project documentation writing guidelines
 
